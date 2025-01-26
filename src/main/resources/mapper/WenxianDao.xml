@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.WenxianDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.wenxian_name as wenxianName
+        ,a.wenxian_uuid_number as wenxianUuidNumber
+        ,a.wenxian_photo as wenxianPhoto
+        ,a.wenxian_file as wenxianFile
+        ,a.wenxian_types as wenxianTypes
+        ,a.wenxian_content as wenxianContent
+        ,a.shangxia_types as shangxiaTypes
+        ,a.wenxian_delete as wenxianDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.WenxianView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM wenxian  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.wenxianName != '' and params.wenxianName != null and params.wenxianName != 'null' ">
+                and a.wenxian_name like CONCAT('%',#{params.wenxianName},'%')
+            </if>
+            <if test=" params.wenxianUuidNumber != '' and params.wenxianUuidNumber != null and params.wenxianUuidNumber != 'null' ">
+                and a.wenxian_uuid_number like CONCAT('%',#{params.wenxianUuidNumber},'%')
+            </if>
+            <if test="params.wenxianTypes != null and params.wenxianTypes != ''">
+                and a.wenxian_types = #{params.wenxianTypes}
+            </if>
+            <if test=" params.wenxianContent != '' and params.wenxianContent != null and params.wenxianContent != 'null' ">
+                and a.wenxian_content like CONCAT('%',#{params.wenxianContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null and params.shangxiaTypes != ''">
+                and a.shangxia_types = #{params.shangxiaTypes}
+            </if>
+            <if test="params.wenxianDeleteStart != null and params.wenxianDeleteStart != ''">
+                <![CDATA[  and a.wenxian_delete >= #{params.wenxianDeleteStart}   ]]>
+            </if>
+            <if test="params.wenxianDeleteEnd != null and params.wenxianDeleteEnd != ''">
+                <![CDATA[  and a.wenxian_delete <= #{params.wenxianDeleteEnd}   ]]>
+            </if>
+             <if test="params.wenxianDelete != null and params.wenxianDelete != ''">
+                and a.wenxian_delete = #{params.wenxianDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

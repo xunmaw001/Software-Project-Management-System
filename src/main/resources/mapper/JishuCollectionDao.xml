@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.JishuCollectionDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.jishu_id as jishuId
+        ,a.yonghu_id as yonghuId
+        ,a.jishu_collection_types as jishuCollectionTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.JishuCollectionView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,jishu.jishu_name as jishuName
+        ,jishu.jishu_uuid_number as jishuUuidNumber
+        ,jishu.jishu_photo as jishuPhoto
+        ,jishu.jishu_file as jishuFile
+        ,jishu.jishu_types as jishuTypes
+        ,jishu.jishu_content as jishuContent
+        ,jishu.shangxia_types as shangxiaTypes
+        ,jishu.jishu_delete as jishuDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM jishu_collection  a
+        left JOIN jishu jishu ON a.jishu_id = jishu.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.jishuId != null and params.jishuId != ''">
+                and (
+                    a.jishu_id = #{params.jishuId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.jishuCollectionTypes != null and params.jishuCollectionTypes != ''">
+                and a.jishu_collection_types = #{params.jishuCollectionTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断技术的id不为空 -->
+            <if test=" params.jishuIdNotNull != '' and params.jishuIdNotNull != null and params.jishuIdNotNull != 'null' ">
+                and a.jishu_id IS NOT NULL
+            </if>
+            <if test=" params.jishuName != '' and params.jishuName != null and params.jishuName != 'null' ">
+                and jishu.jishu_name like CONCAT('%',#{params.jishuName},'%')
+            </if>
+            <if test=" params.jishuUuidNumber != '' and params.jishuUuidNumber != null and params.jishuUuidNumber != 'null' ">
+                and jishu.jishu_uuid_number like CONCAT('%',#{params.jishuUuidNumber},'%')
+            </if>
+            <if test="params.jishuTypes != null  and params.jishuTypes != ''">
+                and jishu.jishu_types = #{params.jishuTypes}
+            </if>
+
+            <if test=" params.jishuContent != '' and params.jishuContent != null and params.jishuContent != 'null' ">
+                and jishu.jishu_content like CONCAT('%',#{params.jishuContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null  and params.shangxiaTypes != ''">
+                and jishu.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+            <if test="params.jishuDeleteStart != null  and params.jishuDeleteStart != '' ">
+                <![CDATA[  and jishu.jishu_delete >= #{params.jishuDeleteStart}   ]]>
+            </if>
+            <if test="params.jishuDeleteEnd != null  and params.jishuDeleteEnd != '' ">
+                <![CDATA[  and jishu.jishu_delete <= #{params.jishuDeleteEnd}   ]]>
+            </if>
+            <if test="params.jishuDelete != null  and params.jishuDelete != '' ">
+                and jishu.jishu_delete = #{params.jishuDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jishu.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jishu.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

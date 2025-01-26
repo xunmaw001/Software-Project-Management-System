@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.JishuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.jishu_name as jishuName
+        ,a.jishu_uuid_number as jishuUuidNumber
+        ,a.jishu_photo as jishuPhoto
+        ,a.jishu_file as jishuFile
+        ,a.jishu_types as jishuTypes
+        ,a.jishu_content as jishuContent
+        ,a.shangxia_types as shangxiaTypes
+        ,a.jishu_delete as jishuDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.JishuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM jishu  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.jishuName != '' and params.jishuName != null and params.jishuName != 'null' ">
+                and a.jishu_name like CONCAT('%',#{params.jishuName},'%')
+            </if>
+            <if test=" params.jishuUuidNumber != '' and params.jishuUuidNumber != null and params.jishuUuidNumber != 'null' ">
+                and a.jishu_uuid_number like CONCAT('%',#{params.jishuUuidNumber},'%')
+            </if>
+            <if test="params.jishuTypes != null and params.jishuTypes != ''">
+                and a.jishu_types = #{params.jishuTypes}
+            </if>
+            <if test=" params.jishuContent != '' and params.jishuContent != null and params.jishuContent != 'null' ">
+                and a.jishu_content like CONCAT('%',#{params.jishuContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null and params.shangxiaTypes != ''">
+                and a.shangxia_types = #{params.shangxiaTypes}
+            </if>
+            <if test="params.jishuDeleteStart != null and params.jishuDeleteStart != ''">
+                <![CDATA[  and a.jishu_delete >= #{params.jishuDeleteStart}   ]]>
+            </if>
+            <if test="params.jishuDeleteEnd != null and params.jishuDeleteEnd != ''">
+                <![CDATA[  and a.jishu_delete <= #{params.jishuDeleteEnd}   ]]>
+            </if>
+             <if test="params.jishuDelete != null and params.jishuDelete != ''">
+                and a.jishu_delete = #{params.jishuDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

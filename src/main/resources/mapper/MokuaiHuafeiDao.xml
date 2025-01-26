@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.MokuaiHuafeiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.mokuai_id as mokuaiId
+        ,a.mokuai_huafei_uuid_number as mokuaiHuafeiUuidNumber
+        ,a.mokuai_huafei_name as mokuaiHuafeiName
+        ,a.mokuai_huafei_types as mokuaiHuafeiTypes
+        ,a.huafei_time as huafeiTime
+        ,a.mokuai_huafei_jine as mokuaiHuafeiJine
+        ,a.mokuai_huafei_content as mokuaiHuafeiContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.MokuaiHuafeiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,mokuai.yonghu_id as mokuaiYonghuId
+        ,mokuai.mokuai_uuid_number as mokuaiUuidNumber
+        ,mokuai.mokuai_name as mokuaiName
+        ,mokuai.mokuai_types as mokuaiTypes
+        ,mokuai.mokuai_jine as mokuaiJine
+        ,mokuai.mokuai_content as mokuaiContent
+        ,mokuai.mokuai_zhuangtai_types as mokuaiZhuangtaiTypes
+        ,mokuai.mokuai_file as mokuaiFile
+        ,mokuai.mokuai_chengguo_content as mokuaiChengguoContent
+
+        FROM mokuai_huafei  a
+        left JOIN mokuai mokuai ON a.mokuai_id = mokuai.id
+        left JOIN xiangmu xiangmu ON mokuai.xiangmu_id = xiangmu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.mokuaiId != null and params.mokuaiId != ''">
+                and (
+                    a.mokuai_id = #{params.mokuaiId}
+                )
+            </if>
+            <if test="params.xiangmujingliId != null and params.xiangmujingliId != ''">
+                and (
+                    xiangmu.xiangmujingli_id = #{params.xiangmujingliId}
+                )
+            </if>
+            <if test=" params.mokuaiHuafeiUuidNumber != '' and params.mokuaiHuafeiUuidNumber != null and params.mokuaiHuafeiUuidNumber != 'null' ">
+                and a.mokuai_huafei_uuid_number like CONCAT('%',#{params.mokuaiHuafeiUuidNumber},'%')
+            </if>
+            <if test=" params.mokuaiHuafeiName != '' and params.mokuaiHuafeiName != null and params.mokuaiHuafeiName != 'null' ">
+                and a.mokuai_huafei_name like CONCAT('%',#{params.mokuaiHuafeiName},'%')
+            </if>
+            <if test="params.mokuaiHuafeiTypes != null and params.mokuaiHuafeiTypes != ''">
+                and a.mokuai_huafei_types = #{params.mokuaiHuafeiTypes}
+            </if>
+            <if test=" params.huafeiTimeStart != '' and params.huafeiTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.huafei_time) >= UNIX_TIMESTAMP(#{params.huafeiTimeStart}) ]]>
+            </if>
+            <if test=" params.huafeiTimeEnd != '' and params.huafeiTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.huafei_time) <= UNIX_TIMESTAMP(#{params.huafeiTimeEnd}) ]]>
+            </if>
+            <if test="params.mokuaiHuafeiJineStart != null ">
+                <![CDATA[  and a.mokuai_huafei_jine >= #{params.mokuaiHuafeiJineStart}   ]]>
+            </if>
+            <if test="params.mokuaiHuafeiJineEnd != null ">
+                <![CDATA[  and a.mokuai_huafei_jine <= #{params.mokuaiHuafeiJineEnd}   ]]>
+            </if>
+            <if test=" params.mokuaiHuafeiContent != '' and params.mokuaiHuafeiContent != null and params.mokuaiHuafeiContent != 'null' ">
+                and a.mokuai_huafei_content like CONCAT('%',#{params.mokuaiHuafeiContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断模块的id不为空 -->
+            <if test=" params.mokuaiIdNotNull != '' and params.mokuaiIdNotNull != null and params.mokuaiIdNotNull != 'null' ">
+                and a.mokuai_id IS NOT NULL
+            </if>
+            <if test="params.xiangmuId != null  and params.xiangmuId != ''">
+                and mokuai.xiangmu_id = #{params.xiangmuId}
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and mokuai.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.mokuaiUuidNumber != '' and params.mokuaiUuidNumber != null and params.mokuaiUuidNumber != 'null' ">
+                and mokuai.mokuai_uuid_number like CONCAT('%',#{params.mokuaiUuidNumber},'%')
+            </if>
+            <if test=" params.mokuaiName != '' and params.mokuaiName != null and params.mokuaiName != 'null' ">
+                and mokuai.mokuai_name like CONCAT('%',#{params.mokuaiName},'%')
+            </if>
+            <if test="params.mokuaiTypes != null  and params.mokuaiTypes != ''">
+                and mokuai.mokuai_types = #{params.mokuaiTypes}
+            </if>
+
+            <if test="params.mokuaiJineStart != null ">
+                <![CDATA[  and mokuai.mokuai_jine >= #{params.mokuaiJineStart}   ]]>
+            </if>
+            <if test="params.mokuaiJineEnd != null ">
+                <![CDATA[  and mokuai.mokuai_jine <= #{params.mokuaiJineEnd}   ]]>
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(mokuai.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(mokuai.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test=" params.mokuaiContent != '' and params.mokuaiContent != null and params.mokuaiContent != 'null' ">
+                and mokuai.mokuai_content like CONCAT('%',#{params.mokuaiContent},'%')
+            </if>
+            <if test="params.mokuaiZhuangtaiTypes != null  and params.mokuaiZhuangtaiTypes != ''">
+                and mokuai.mokuai_zhuangtai_types = #{params.mokuaiZhuangtaiTypes}
+            </if>
+
+            <if test=" params.mokuaiChengguoContent != '' and params.mokuaiChengguoContent != null and params.mokuaiChengguoContent != 'null' ">
+                and mokuai.mokuai_chengguo_content like CONCAT('%',#{params.mokuaiChengguoContent},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

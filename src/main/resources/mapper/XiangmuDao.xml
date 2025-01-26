@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.XiangmuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.xiangmujingli_id as xiangmujingliId
+        ,a.xiangmu_name as xiangmuName
+        ,a.xiangmu_uuid_number as xiangmuUuidNumber
+        ,a.xiangmu_types as xiangmuTypes
+        ,a.xiangmu_jine as xiangmuJine
+        ,a.xiangmu_shengyu_jine as xiangmuShengyuJine
+        ,a.xiangmu_file as xiangmuFile
+        ,a.xiangmu_content as xiangmuContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.XiangmuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,xiangmujingli.xiangmujingli_name as xiangmujingliName
+        ,xiangmujingli.xiangmujingli_phone as xiangmujingliPhone
+        ,xiangmujingli.xiangmujingli_id_number as xiangmujingliIdNumber
+        ,xiangmujingli.xiangmujingli_photo as xiangmujingliPhoto
+        ,xiangmujingli.xiangmujingli_email as xiangmujingliEmail
+
+        FROM xiangmu  a
+        left JOIN xiangmujingli xiangmujingli ON a.xiangmujingli_id = xiangmujingli.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.xiangmujingliId != null and params.xiangmujingliId != ''">
+                and (
+                    a.xiangmujingli_id = #{params.xiangmujingliId}
+                )
+            </if>
+            <if test=" params.xiangmuName != '' and params.xiangmuName != null and params.xiangmuName != 'null' ">
+                and a.xiangmu_name like CONCAT('%',#{params.xiangmuName},'%')
+            </if>
+            <if test=" params.xiangmuUuidNumber != '' and params.xiangmuUuidNumber != null and params.xiangmuUuidNumber != 'null' ">
+                and a.xiangmu_uuid_number like CONCAT('%',#{params.xiangmuUuidNumber},'%')
+            </if>
+            <if test="params.xiangmuTypes != null and params.xiangmuTypes != ''">
+                and a.xiangmu_types = #{params.xiangmuTypes}
+            </if>
+            <if test="params.xiangmuJineStart != null ">
+                <![CDATA[  and a.xiangmu_jine >= #{params.xiangmuJineStart}   ]]>
+            </if>
+            <if test="params.xiangmuJineEnd != null ">
+                <![CDATA[  and a.xiangmu_jine <= #{params.xiangmuJineEnd}   ]]>
+            </if>
+            <if test="params.xiangmuShengyuJineStart != null ">
+                <![CDATA[  and a.xiangmu_shengyu_jine >= #{params.xiangmuShengyuJineStart}   ]]>
+            </if>
+            <if test="params.xiangmuShengyuJineEnd != null ">
+                <![CDATA[  and a.xiangmu_shengyu_jine <= #{params.xiangmuShengyuJineEnd}   ]]>
+            </if>
+            <if test=" params.xiangmuContent != '' and params.xiangmuContent != null and params.xiangmuContent != 'null' ">
+                and a.xiangmu_content like CONCAT('%',#{params.xiangmuContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断项目经理的id不为空 -->
+            <if test=" params.xiangmujingliIdNotNull != '' and params.xiangmujingliIdNotNull != null and params.xiangmujingliIdNotNull != 'null' ">
+                and a.xiangmujingli_id IS NOT NULL
+            </if>
+            <if test=" params.xiangmujingliName != '' and params.xiangmujingliName != null and params.xiangmujingliName != 'null' ">
+                and xiangmujingli.xiangmujingli_name like CONCAT('%',#{params.xiangmujingliName},'%')
+            </if>
+            <if test=" params.xiangmujingliPhone != '' and params.xiangmujingliPhone != null and params.xiangmujingliPhone != 'null' ">
+                and xiangmujingli.xiangmujingli_phone like CONCAT('%',#{params.xiangmujingliPhone},'%')
+            </if>
+            <if test=" params.xiangmujingliIdNumber != '' and params.xiangmujingliIdNumber != null and params.xiangmujingliIdNumber != 'null' ">
+                and xiangmujingli.xiangmujingli_id_number like CONCAT('%',#{params.xiangmujingliIdNumber},'%')
+            </if>
+            <if test=" params.xiangmujingliEmail != '' and params.xiangmujingliEmail != null and params.xiangmujingliEmail != 'null' ">
+                and xiangmujingli.xiangmujingli_email like CONCAT('%',#{params.xiangmujingliEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
